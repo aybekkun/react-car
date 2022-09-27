@@ -8,6 +8,8 @@ import { fetchData } from "../store/slices/dataSlice";
 import tableImg from "../assets/images/table.svg";
 import roundImg from "../assets/images/round.svg";
 import infoImg from "../assets/images/info.svg";
+import downloadImg from "../assets/images/download.svg";
+import axios from "../axios";
 const Home = () => {
   const dispatch = useDispatch();
   const { currentPage, searchWord, searchType } = useSelector(
@@ -19,7 +21,22 @@ const Home = () => {
     const params = `?page=${currentPage}${search}`;
     dispatch(fetchData(params));
   }, [currentPage, searchWord]);
-  console.log(currentPage);
+
+  const onClickDownload = async () => {
+    await axios({
+      url: '/export',
+      method: 'POST',
+      responseType: 'blob', // important
+    }).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'file.xlsx');
+      document.body.appendChild(link);
+      link.click();
+    });
+  };
+
   return (
     <>
       <Container fluid>
@@ -41,6 +58,9 @@ const Home = () => {
                 <Link to="/info">
                   <img src={infoImg} alt="" /> <span>Инфография</span>
                 </Link>
+              </li>
+              <li onClick={onClickDownload} className="download">
+                <img src={downloadImg} alt="" /> <span>Скачать таблицу</span>
               </li>
             </ul>
           </Col>
